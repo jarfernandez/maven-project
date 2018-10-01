@@ -2,8 +2,10 @@ pipeline {
     agent any
 
     parameters {
-         string(name: 'tomcat_dev', defaultValue: '35.166.210.154', description: 'Staging Server')
-         string(name: 'tomcat_prod', defaultValue: '34.209.233.6', description: 'Production Server')
+         string(name: 'tomcat_dev', defaultValue: '172.20.0.3', description: 'Staging Server')
+         string(name: 'tomcat_dev_port', defaultValue: '22', description: 'Staging Server Port')
+         string(name: 'tomcat_prod', defaultValue: '172.20.0.2', description: 'Production Server')
+         string(name: 'tomcat_prod_port', defaultValue: '22', description: 'Production Server Port')
     }
 
     triggers {
@@ -27,13 +29,13 @@ stages{
             parallel{
                 stage ('Deploy to Staging'){
                     steps {
-                        sh "scp -i /home/jenkins/tomcat-demo.pem **/target/*.war ec2-user@${params.tomcat_dev}:/var/lib/tomcat7/webapps"
+                        sh "scp -i /var/jenkins_home/tomcat-key.pub -P ${params.tomcat_dev_port} **/target/*.war root@${params.tomcat_dev}:/usr/local/tomcat/webapps"
                     }
                 }
 
                 stage ("Deploy to Production"){
                     steps {
-                        sh "scp -i /home/jenkins/tomcat-demo.pem **/target/*.war ec2-user@${params.tomcat_prod}:/var/lib/tomcat7/webapps"
+                        sh "scp -i /var/jenkins_home/tomcat-key.pub -P ${params.tomcat_prod_port} **/target/*.war root@${params.tomcat_prod}:/usr/local/tomcat/webapps"
                     }
                 }
             }
